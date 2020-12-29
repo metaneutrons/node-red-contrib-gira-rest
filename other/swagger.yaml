@@ -1,0 +1,179 @@
+swagger: "2.0"
+info:
+  title: gira-rest-api
+  version: v1.0
+schemes:
+  - https
+securityDefinitions:
+  basic_auth:
+    type: basic
+tags: []
+basePath: /api/v2
+paths:
+  /:
+    get:
+      summary: Available
+      description: >-
+        Checks availability of GIRA X1 and returns deviceName, deviceType,
+        deviceVerison, info and API version.
+      operationId: GiraAPI_IsAvailable
+      responses:
+        default:
+          description: no response description was provided for this operation
+      parameters: []
+  /clients:
+    post:
+      summary: Register Client
+      description: >-
+        Registers client with identifier with basic authentication (username and
+        password) and returns token.
+      operationId: GiraAPI_RegisterClient
+      consumes:
+        - application/json
+      parameters:
+        - required: true
+          schema:
+            type: string
+            default: '{"client":"de.gira.dev.testclient"}'
+          in: body
+          name: body
+      responses:
+        default:
+          description: no response
+      security:
+        - basic_auth: []
+  /clients/{token}:
+    delete:
+      summary: Unregister Client
+      description: Unregisters client by token.
+      operationId: GiraAPI_UnregisterClient
+      responses:
+        default:
+          description: no response description was provided for this operation
+      parameters:
+        - in: path
+          name: token
+          type: string
+          required: true
+          description: Security Token
+  /clients/{token}/callbacks:
+    post:
+      summary: Register Callbacks
+      description: >-
+        Registers callbacks for (optional) serviceCallback, (optional)
+        valueCallback and (optionally) test the service before registering when
+        testCallbacks is true.
+      operationId: GiraAPI_RegisterCallbacks
+      consumes:
+        - application/json
+      parameters:
+        - required: false
+          schema:
+            type: string
+            default: >-
+              {
+                "serviceCallback": "https://nodered.dev.schmieder.eu/gira/service",
+                "valueCallback": "https://nodered.dev.schmieder.eu/gira/value",
+                "testCallbacks": true
+              }
+          in: body
+          name: body
+        - in: path
+          name: token
+          type: string
+          required: true
+          description: Security Token
+      responses:
+        default:
+          description: no response description was provided for this operation
+    delete:
+      summary: Unregister Callbacks
+      description: Unregisters alls Callbacks by token
+      operationId: GiraAPI_UnregisterCallbacks
+      responses:
+        default:
+          description: no response description was provided for this operation
+      parameters:
+        - in: path
+          name: token
+          type: string
+          required: true
+          description: Security Token
+  /uiconfig:
+    get:
+      summary: Get UI configuration
+      description: Get all UIDs as an json-array.
+      operationId: GiraAPI_GetUIconfig
+      consumes:
+        - application/json
+      parameters:
+        - type: string
+          name: token
+          required: true
+          in: query
+          description: Security Token
+        - type: string
+          name: expand
+          required: false
+          in: query
+          description: Expands json-array to dataPointFlags,parameters,locations,trades (comma-separeted)
+      responses:
+        default:
+          description: no response description was provided for this operation
+  "/values/{uid}":
+    get:
+      summary: Get Value
+      description: "Gets value of UID."
+      operationId: GiraAPI_GetValue
+      parameters:
+        - type: string
+          name: token
+          required: true
+          in: query
+        - type: string
+          default: a02e
+          name: uid
+          description: UIUD of requested value
+          required: true
+          in: path
+      responses:
+        default:
+          description: no response.
+    put:
+      summary: Set Value
+      description: "Sets UID to value."
+      operationId: GiraAPI_SetValue
+      consumes:
+        - application/json
+      parameters:
+        - type: string
+          name: token
+          required: true
+          in: query
+        - required: true
+          schema:
+            type: string
+          in: body
+          name: body
+        - type: string
+          default: a02e
+          name: uid
+          description: UID of value to set
+          required: true
+          in: path
+      responses:
+        default:
+          description: no response.
+  /licenses:
+    get:
+      summary: Get Licenses
+      description: Gets all licenses installed on Gira X1/HomeServer as json-array.
+      operationId: GiraAPI_GetLicenses
+      parameters:
+        - type: string
+          name: token
+          required: true
+          in: query
+      responses:
+        default:
+          description: json-encoded array of licenses.

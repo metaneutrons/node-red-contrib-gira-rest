@@ -1,0 +1,30 @@
+{
+  "name": "node-red-contrib-gira-rest",
+  "version": "1.0.0",
+  "description": "Node-RED node for Gira REST API",
+  "node-red": {
+    "nodes": {
+      "gira-host": "nodes/gira-host.js",
+      "gira-event": "nodes/gira-event.js",
+      "gira-get": "nodes/gira-get.js",
+      "gira-set": "nodes/gira-set.js"
+    }
+  },
+  "keywords": [
+    "node-red",
+    "gira",
+    "x1",
+    "homeserver",
+    "knx"
+  ],
+  "dependencies": {
+    "q": "1.5.1",
+    "request": "2.88.2"
+  },
+  "devDependencies": {
+    "mocha": "6.2.0",
+    "node-red": "1.2.3"
+  },
+  "author": "Fabian Schmieder",
+  "license": "GPL-3.0-or-later"
+}

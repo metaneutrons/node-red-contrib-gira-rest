@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // ${workspaceFolder}
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Node-Red",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "/usr/local/lib/node_modules/node-red/red.js",
+            "runtimeArgs": [
+                "--preserve-symlinks",
+                "--experimental-modules"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug current file",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${file}"
+        },
+        { "type": "node", "request": "attach", "name": "Attach to process", "processId": "${command:PickProcess}" }
+    ]
+}

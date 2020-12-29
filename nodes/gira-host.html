@@ -1,0 +1,64 @@
+<script type="text/javascript">
+    "use strict";
+
+    RED.nodes.registerType('gira-host', {
+        category: 'config',
+        defaults: {
+            hosturl: { value: 'https://gira-restapi-hostname', validate: RED.validators.regex(/^https:\/\/(.*)/), required: true },
+            clientid: { value: 'de.gira.dev.testclient', required: true },
+            callbackurl: { value: 'https://nodered/path', validate: RED.validators.regex(/^https:\/\/(.*)/), required: true }
+        },
+        credentials: {
+            username: { type: 'text' },
+            password: { type: 'password' }
+        },
+        label: function () {
+            return this.name || this.hosturl || this.clientid;
+        },
+        labelStyle: function () {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function () {
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="gira-host">
+    <div class="form-row">
+        <label for="node-config-input-hosturl-label" for="node-config-input-hosturl"><i class="fa fa-globe"></i> <span data-i18n="label.hosturl"></span></label>
+        <input type="text" id="node-config-input-hosturl" placeholder="https://gira-restapi-hostname">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-clientid-label" for="node-config-input-clientid"><i class="fa fa-tag"></i> <span data-i18n="label.clientid"></span></label>
+        <input type="text" id="node-config-input-clientid" placeholder="de.gira.dev.testclient">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-callbackurl-label" for="node-config-input-callbackurl"><i class="fa fa-globe"></i> <span data-i18n="label.callbackurl"></span></label>
+        <input type="text" id="node-config-input-callbackurl" placeholder="https://nodered/path">
+    </div>
+
+    <div class="form-row">
+        <label id="node-config-input-username-label" for="node-config-input-username"><i class="fa fa-user"></i> <span data-i18n="node-red:common.label.username"></span></label>
+        <input type="text" id="node-config-input-username" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label id="node-config-input-password-label" for="node-config-input-password"><i class="fa fa-lock"></i> <span data-i18n="node-red:common.label.password"></span></label>
+        <input type="password" id="node-config-input-password" placeholder="">
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-name-label"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-config-input-name" data-i18n="node-red:common.label.name" placeholder="">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="gira-host">
+    <p><b>Host URL</b>: URL of Gira device</p>
+    <p><b>Client Identifier:</b> Unique identifier to the RESTful service</p>
+    <p><b>Username</b>: Username</p>
+    <p><b>Password</b>: Password</p>
+</script>
+

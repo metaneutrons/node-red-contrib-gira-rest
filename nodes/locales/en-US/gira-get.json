@@ -1,0 +1,9 @@
+{
+    "label": {
+        "host": "Gira API Endpoint",
+        "uid": "UID"
+    },
+    "status": {
+        "requesting": "Requesting..."
+    }
+}
