@@ -21,7 +21,7 @@ This project is highly beta at the moment. The basic functionality is implemente
 
 Details about the Gira RESTful API are available [here](https://download.gira.de/data3/Gira_IoT_REST_API_v2_EN.pdf "Gira IoT REST API Documentation" ). For the interaction with _node-red-contrib-gira-rest_ it's important to know that the Gira API implements the concept of _unique identifiers_ (UIDs). UIDs are four-chars long strings representing one (or a set of) datapoints of the Gira X1/Gira HomeServer.
 
-The API function 'GiraAPI_GetUIconfig' is used to get the whole user interface configuraton from the device. This function is implemented in the _gira-host_ (configuration) node for the use in future versions. At the moment can get the whole UIconfiguration as a JSON-Object by using the _gira-get_ node (see below).
+The API function 'GiraAPI_GetUIconfig' is used to get the whole user interface configuraton from the device. This function is implemented in the _gira-host_ (configuration) node for the use in future versions. At the moment can get the whole UIconfiguration as a JSON-object by using the _gira-get_ node (see below).
 
 As an example for this documentation I use the UID _a00v_. The example UIconfig look like:
 
@@ -104,11 +104,11 @@ As an example for this documentation I use the UID _a00v_. The example UIconfig 
 ### gira-host - Configuration of the API endpoint
 
 All nodes share a common configuration node (_gira-host_) with the following properties:
-* Host URL - This is the __https-only__ URL of the Gira REST API endpoint. Usualy this points to the __domainname__ or the __IP-address__ of the Gira X1 or Gira HomeServer.
-* Callback URL - The __https-only__ URL of the Node-Red instance, where the callback service of the node is accessible for the Gira X1 or Gira HomeServer. The callback is used for emitting events from the Gira X1 or Gira HomeServer to the node. This can be the [Node-Red web server itself with an SSL certificate](https://nodered.org/docs/user-guide/runtime/securing-node-red). However, a [reverse proxy server](https://en.wikipedia.org/wiki/Reverse_Proxy) is more preferable [nginx](https://www.nginx.com), [Træfik](https://traefik.io), et al.). The HTTP callback is using `RED.httpnode`. To avoid conflicts with other nodes, it's using an URL path like `/node-red-contrib-gira-rest/{ ID of the gira-host node }/service'`.
-* Username - The username for accessing the Gira REST API.
-* Password - The password for accessing the Gira REST API.
-* Name - The usual Node-Red name property.
+* **Host URL** - This is the __https-only__ URL of the Gira REST API endpoint. Usualy this points to the __domainname__ or the __IP-address__ of the Gira X1 or Gira HomeServer.
+* **Callback URL** - The __https-only__ URL of the Node-Red instance, where the callback service of the node is accessible for the Gira X1 or Gira HomeServer. The callback is used for emitting events from the Gira X1 or Gira HomeServer to the node. This can be the [Node-Red web server itself with an SSL certificate](https://nodered.org/docs/user-guide/runtime/securing-node-red). However, a [reverse proxy server](https://en.wikipedia.org/wiki/Reverse_Proxy) is more preferable ([nginx](https://www.nginx.com), [Træfik](https://traefik.io), et al.). The HTTP callback is using `RED.httpNode`. To avoid conflicts with other nodes, it's using an URL path like `/node-red-contrib-gira-rest/{ ID of the gira-host node }/service'`. For security reasons the callback service expects the token issued by the Gira REST API after first registration of the client in the JSON-object in the body of the request.
+* **Username** - The username for accessing the Gira REST API.
+* **Password** - The password for accessing the Gira REST API.
+* **Name** - The usual Node-Red name property.
 
 ### gira-get
 
@@ -153,7 +153,7 @@ If you emit a JSON-object with the primary key _values_, the UID in the configur
 
 2. You can set the UID as `msg.topic`. If it's set to a four-character long string, the UID in the configuration dialog of the node is overruled.
 
-3. You can set the UID in the configuration dialog. In this case you can set the value by `msg.payload`.
+3. You can set the UID in the configuration dialog. In this case you can set the value in `msg.payload`.
 
 ### gira-event
 
@@ -180,6 +180,7 @@ There are some special events desrcibed in chapter 4.6 of the [Gira REST API](ht
 ## Todos
 
 * ~~Add comprehensive information to the README.md~~
+* Migrate from `request` to something other...
 * Add helpful information to the configuration of the nodes in the editor
 * Utilize `uiconfig` object for the configuration of the node (TreeView, Dropdowns, et al.)
 * Considerate using information from `uiconfig` for the `gira-event` and `gira-get` output to `msg.payload`
