@@ -44,7 +44,6 @@ module.exports = function (RED) {
 
         node.queueEvent = body => {
             try {
-                delete body.token;
                 var message = {'payload': body };
                 node.send(message);
                 node.status({});

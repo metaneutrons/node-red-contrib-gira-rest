@@ -5,7 +5,6 @@
         category: 'config',
         defaults: {
             hosturl: { value: 'https://gira-restapi-hostname', validate: RED.validators.regex(/^https:\/\/(.*)/), required: true },
-            clientid: { value: 'de.gira.dev.testclient', required: true },
             callbackurl: { value: 'https://nodered/path', validate: RED.validators.regex(/^https:\/\/(.*)/), required: true }
         },
         credentials: {
@@ -27,11 +26,6 @@
     <div class="form-row">
         <label for="node-config-input-hosturl-label" for="node-config-input-hosturl"><i class="fa fa-globe"></i> <span data-i18n="label.hosturl"></span></label>
         <input type="text" id="node-config-input-hosturl" placeholder="https://gira-restapi-hostname">
-    </div>
-
-    <div class="form-row">
-        <label for="node-config-input-clientid-label" for="node-config-input-clientid"><i class="fa fa-tag"></i> <span data-i18n="label.clientid"></span></label>
-        <input type="text" id="node-config-input-clientid" placeholder="de.gira.dev.testclient">
     </div>
 
     <div class="form-row">

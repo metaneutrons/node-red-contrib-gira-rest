@@ -26,7 +26,7 @@ module.exports = function (RED) {
         var node = this;
 
         node.hosturl = config.hosturl;
-        node.clientid = config.clientid;
+        node.clientid = 'node-red-contrib-gira-rest.' + node.id;
         node.callbackurl = config.callbackurl;
         node.callbackpath_service = '/node-red-contrib-gira-rest/' + node.id + '/service';
         node.callbackpath_value = '/node-red-contrib-gira-rest/' + node.id + '/value';
@@ -41,17 +41,19 @@ module.exports = function (RED) {
         node.nodeClients = [];
 
         // HTTP endpoint for service callback functions
-        RED.httpAdmin.post(node.callbackpath_service, function (req, res) {
-            var nodeId = req.params.nodeId;
+        RED.httpNode.post(node.callbackpath_service, function (req, res) {
             if (req.body && req.body.token && req.body.token == node.token) {
                 res.send(200).end();
+
+                // delete security token from response
+                delete req.body.token;
 
                 // if uiConfig has changed, update the configuration of the node
                 if (req.body.event == 'uiConfigChanged') {
                     node.getUIconfig();
                 }
 
-                //if (req.body.events.length > 0) {
+                // if (req.body.events.length > 0) {
                 node.nodeClients.forEach(stack => {
                     stack.queueEvent(req.body);
                 });
@@ -63,10 +65,12 @@ module.exports = function (RED) {
         });
 
         // HTTP endpoint for value callback functions
-        RED.httpAdmin.post(node.callbackpath_value, function (req, res) {
-            var nodeId = req.params.nodeId;
+        RED.httpNode.post(node.callbackpath_value, function (req, res) {
             if (req.body && req.body.token && req.body.token == node.token) {
                 res.send(200).end();
+
+                // delete security token from response
+                delete req.body.token;
 
                 if (req.body.events.length > 0) {
                     node.nodeClients.forEach(stack => {
@@ -394,7 +398,7 @@ module.exports = function (RED) {
             if (removed) {
                 // This node has been disabled/deleted
                 // console.log("Host removed.");
-                
+
             } else {
                 // This node is being restarted
                 // console.log("Host restarted.");
