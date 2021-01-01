@@ -17,9 +17,6 @@
  * 'use strict';
  */
 
-const { send } = require('q');
-var gira_rest_api = require('./lib/gira-rest-api.js');
-
 module.exports = function (RED) {
     function GiraEvent(config) {
         RED.nodes.createNode(this, config);
@@ -28,13 +25,15 @@ module.exports = function (RED) {
         this.host = RED.nodes.getNode(config.host);
         let node = this;
 
+        node.giranodetype = 'gira-event';
+
         node.on('close', function (removed, done) {
             if (removed) {
                 // This node has been disabled/deleted
-                // console.log("Event removed.");
+                // node.debug("Event removed.");
             } else {
                 // This node is being restarted
-                //console.log("Event restarted.");
+                //node.debug("Event restarted.");
             }
             if (node.host) {
                 node.host.removeClient(node);
@@ -44,22 +43,23 @@ module.exports = function (RED) {
 
         node.queueEvent = body => {
             try {
-                var message = {'payload': body };
+                var message = {"payload": body };
+                node.trace('gira-event: got event ' + JSON.stringify(body));
                 node.send(message);
                 node.status({});
             }
             catch (error) { 
-                // console.log(error);
+                node.debug(error);
                 node.status({ fill: 'red', shape: 'ring', text: 'node-red:common.status.error' });
             }
         };
 
         // On each deploy, unsubscribe+resubscribe
         if (node.host) {
+            node.debug('Deploying node; removing from gira-host and readding.');
             node.host.removeClient(node);
             node.host.addClient(node);
         }
-
     }
     RED.nodes.registerType("gira-event", GiraEvent);
 };

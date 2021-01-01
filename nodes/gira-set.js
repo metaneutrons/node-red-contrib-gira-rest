@@ -29,9 +29,40 @@ module.exports = function (RED) {
 
         let node = this;
 
+        node.giranodetype = 'gira-set';
+
+        // On each deploy, unsubscribe+resubscribe
+        if (node.host) {
+            node.debug('Deploying node; removing from gira-host and readding.');
+            node.host.removeClient(node);
+            node.host.addClient(node);
+        }
+
+        node.on('close', function (removed, done) {
+            if (removed) {
+                // This node has been disabled/deleted
+                // node.debug("Event removed.");
+            } else {
+                // This node is being restarted
+                //node.debug("Event restarted.");
+            }
+            if (node.host) {
+                node.debug('OnClose: Removing from gira-host.');
+                node.host.removeClient(node);
+            }
+            done();
+        });
+
         node.on('input', function (msg, send, done) {
             var errorFlag = false;
             var client;
+
+            if (this.host.token.length == 0)
+            {
+                done('Not registered with Gira API. No token.');
+                return;
+            }
+
             if (this.host && this.host.hosturl) {
                 client = new gira_rest_api.GiraRestApi({ domain: this.host.hosturl });
             } else {
@@ -39,13 +70,8 @@ module.exports = function (RED) {
                 done('HostUrl in configuration node is not specified.', msg);
             }
 
-            if (!node.host.checkHostAvailable()) {
+            if (!node.host.connected) {
                 errorFlag = true;
-                node.status({ fill: 'red', shape: 'ring', text: 'node-red:common.status.error' });
-                done('Gira API Host not available.', msg);
-            }
-            else {
-                node.status({});
             }
 
             if (!errorFlag && this.host && this.host.credentials) {
@@ -91,7 +117,7 @@ module.exports = function (RED) {
                 }
                 else {
                     errorFlag = true;
-                    done('Uid not correctly set in configuration dialog or in topic (length must be four chars!).');
+                    done('UID not correctly set in configuration dialog or in topic (length must be four chars!).');
                 }
             }
 
@@ -118,7 +144,12 @@ module.exports = function (RED) {
             if (!errorFlag) {
                 node.status({ fill: 'blue', shape: 'dot', text: 'status.requesting' });
                 result.then(function (data) {
-                    send(setData(msg, data));
+                    var message = setData(msg, data);
+                    delete message.statusCode;
+                    delete message.headers;
+                    delete message.responseUrl;
+                    node.trace(msg);
+                    send(message);
                     node.status({});
                 }).catch(function (error) {
                     var message = null;

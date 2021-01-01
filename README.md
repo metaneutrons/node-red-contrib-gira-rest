@@ -1,9 +1,12 @@
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![NPM version][npm-version-image]][npm-url]
+[![NPM downloads per month][npm-downloads-month-image]][npm-url]
+[![NPM downloads total][npm-downloads-total-image]][npm-url]
+[![GPL v3 License][license-image]][license-url]
 
 node-red-contrib-gira-rest
 ================
 
-[Node-RED](https://nodered.org) node for [Gira X1](https://www.gira.de/produkte/smart-home/gira-x1 "Gira X1 Product Homepage")/[Gira HomeServer](https://www.gira.de/produkte/smart-home/gira-homeserver "Gira HomeServer Product Hompage") REST [API](https://download.gira.de/data3/Gira_IoT_REST_API_v2_EN.pdf "Gira IoT REST API Documentation" )
+[Node-RED](https://nodered.org) node for [Gira X1](https://www.gira.de/produkte/smart-home/gira-x1 "Gira X1 Product Homepage")/[Gira HomeServer](https://www.gira.de/produkte/smart-home/gira-homeserver "Gira HomeServer Product Hompage") REST [API]([gira-api-url] "Gira IoT REST API Documentation" )
 
 ## Install
 
@@ -19,7 +22,7 @@ This project is highly beta at the moment. The basic functionality is implemente
 
 ## About Gira REST API & unique identifiers (UIDs)
 
-Details about the Gira RESTful API are available [here](https://download.gira.de/data3/Gira_IoT_REST_API_v2_EN.pdf "Gira IoT REST API Documentation" ). For the interaction with _node-red-contrib-gira-rest_ it's important to know that the Gira API implements the concept of _unique identifiers_ (UIDs). UIDs are four-chars long strings representing one (or a set of) datapoints of the Gira X1/Gira HomeServer.
+Details about the Gira RESTful API are available [here]([gira-api-url] "Gira IoT REST API Documentation" ). For the interaction with _node-red-contrib-gira-rest_ it's important to know that the Gira API implements the concept of _unique identifiers_ (UIDs). UIDs are four-chars long strings representing one (or a set of) datapoints of the Gira X1/Gira HomeServer.
 
 The API function 'GiraAPI_GetUIconfig' is used to get the whole user interface configuraton from the device. This function is implemented in the _gira-host_ (configuration) node for the use in future versions. At the moment can get the whole UIconfiguration as a JSON-object by using the _gira-get_ node (see below).
 
@@ -171,26 +174,36 @@ The `gira-event` node is simple to use. It emits all events received by the Gira
     "failures":0
 }
 ```
-There are some special events desrcibed in chapter 4.6 of the [Gira REST API](https://download.gira.de/data3/Gira_IoT_REST_API_v2_EN.pdf "Gira IoT REST API Documentation" ) documentation. Most notably is the event `uiConfigChanged`. This event notifies the API client about a change of the internal user interface configuration of the Gira X1/Gira HomeServer. If this event gets fired, the `gira-host` node updates it's internal `uiconfig` object.
+There are some special events desrcibed in chapter 4.6 of the [Gira REST API]([gira-api-url]) documentation. Most notably is the event `uiConfigChanged`. This event notifies the API client about a change of the internal user interface configuration of the Gira X1/Gira HomeServer. If this event gets fired, the `gira-host` node updates it's internal `uiconfig` object.
 
 ## Example
 
-![Example Node-Red Flow using gira-get, gira-set and gira-event](other/gfx/example-node-configuration.png "Example Flow")
+![Example Flow]([example-flow-png-url])
 
 ## Todos
 
-* ~~Add comprehensive information to the README.md~~
-* Migrate from `request` to something other...
-* Add helpful information to the configuration of the nodes in the editor
-* Utilize `uiconfig` object for the configuration of the node (TreeView, Dropdowns, et al.)
-* Considerate using information from `uiconfig` for the `gira-event` and `gira-get` output to `msg.payload`
+- [x] ~~Add comprehensive information to the README.md~~
+- [x] ~~Add `node.debug` and `node.trace` debugging~~
+- [ ] Migrate from `request` to something other...
+- [ ] Add helpful information to the configuration of the nodes in the editor
+- [ ] Utilize `uiconfig` object for the configuration of the node (TreeView, Dropdowns, et al.)
+- [ ] Considerate using information from `uiconfig` for the `gira-event` and `gira-get` output to `msg.payload`
 
 ## Licensing
 
-__node-red-contrib-gira-rest__ is licensed under [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.en.html).
+__node-red-contrib-gira-rest__ is licensed under [GNU General Public License v3]([license-url]).
 
 ## Donate
 
-I developed this set of nodes for my personal learning experience. They are probably far from being perfect and probably are not even good examples of how to develop custom nodes for Node-Red. Therefore, I do not ask for money, but I hope that others will contribute and remove my mistakes. But if you absolutely want to send an attention to me, then I do like an invite for a coffee (or mostly tea at the moment)...
+I developed this set of nodes for my personal learning experience and use in my smart home. They are probably far from being perfect and probably are not even good examples of how to develop custom nodes for Node-Red. Therefore, I do not ask for money, but I hope that others will contribute and remove my mistakes. But if you absolutely want to send an attention to me, then I do like an invite for a coffee (or mostly tea at the moment)...
 
 [![Donate button](https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/metaneutrons)
+
+[license-image]: https://img.shields.io/badge/License-GPLv3-blue.svg
+[license-url]: https://github.com/metaneutrons/node-red-contrib-gira-rest/main/LICENSE
+[npm-url]: https://npmjs.org/package/node-red-contrib-gira-rest
+[npm-version-image]: https://img.shields.io/npm/v/node-red-contrib-gira-rest.svg
+[npm-downloads-month-image]: https://img.shields.io/npm/dm/node-red-contrib-gira-rest.svg
+[npm-downloads-total-image]: https://img.shields.io/npm/dt/node-red-contrib-gira-rest.svg
+[gira-api-url]: https://download.gira.de/data3/Gira_IoT_REST_API_v2_EN.pdf
+[example-flow-png-url]: https://raw.githubusercontent.com/metaneutrons/node-red-contrib-gira-rest/main/other/gfx/example-node-configuration.png
