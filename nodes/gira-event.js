@@ -33,7 +33,7 @@ module.exports = function (RED) {
                 // node.debug("Event removed.");
             } else {
                 // This node is being restarted
-                //node.debug("Event restarted.");
+                // node.debug("Event restarted.");
             }
             if (node.host) {
                 node.host.removeClient(node);
@@ -44,7 +44,7 @@ module.exports = function (RED) {
         node.queueEvent = body => {
             try {
                 var message = {"payload": body };
-                node.trace('gira-event: got event ' + JSON.stringify(body));
+                node.trace('got event ' + JSON.stringify(body));
                 node.send(message);
                 node.status({});
             }

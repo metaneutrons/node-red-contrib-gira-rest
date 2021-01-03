@@ -18,6 +18,7 @@
  */
 
 'use strict';
+const { denodeify } = require('q');
 var gira_rest_api = require('./lib/gira-rest-api.js');
 
 module.exports = function (RED) {
@@ -26,14 +27,14 @@ module.exports = function (RED) {
 
         // Retrieve the config node, where the device is configured
         this.host = RED.nodes.getNode(config.host);
-
         let node = this;
 
         node.giranodetype = 'gira-get';
+        const fname = 'GiraGet()';
 
         // On each deploy, unsubscribe+resubscribe
         if (node.host) {
-            node.debug('Deploying node; removing from gira-host and readding.');
+            node.debug(fname + 'Deploying node; removing from gira-host and readding.');
             node.host.removeClient(node);
             node.host.addClient(node);
         }
@@ -47,28 +48,30 @@ module.exports = function (RED) {
                 //node.debug("Event restarted.");
             }
             if (node.host) {
-                node.debug('OnClose: Removing from gira-host.');
+                node.debug("node.on('close'): Removing from gira-host.");
                 node.host.removeClient(node);
             }
+            done();
         });
 
         node.on('input', function (msg, send, done) {
+            const fname = "node.on('input') ";
             var errorFlag = false;
             var client;
-
+            
             if (this.host && this.host.hosturl) {
                 client = new gira_rest_api.GiraRestApi({ domain: this.host.hosturl });
             } else {
-                done('HostUrl in configuration node is not specified.', msg);
                 errorFlag = true;
+                done('Node is not associated with a host configuration.');
             }
 
             if (!node.host.connected) {
+                done('Not connected to Gira API.');
                 errorFlag = true;
             }
 
             if (!errorFlag) {
-
                 var result;
                 if (!errorFlag) {
                     var parameters = { 'token': this.host.token, 'uid': config.uid };
@@ -130,12 +133,12 @@ module.exports = function (RED) {
                 }).catch(function (error) {
                     var message = null;
                     if (error && error.body && error.body.error && error.body.error.message) {
-                        message = "Gira API: " + error.body.error.message;
+                        message = fname + "Gira API: " + error.body.error.message;
                     }
                     else if (error && error.body && error.body.message) {
                         message = error.body.message;
                     }
-                    done(message, setData(msg, error));
+                    done(message);
                     node.status({ fill: 'red', shape: 'ring', text: 'node-red:common.status.error' });
                     return;
                 });

@@ -18,6 +18,7 @@
  */
 
 'use strict';
+const { debug } = require('request');
 var gira_rest_api = require('./lib/gira-rest-api.js');
 
 module.exports = function (RED) {
@@ -41,34 +42,52 @@ module.exports = function (RED) {
 
         // HTTP endpoint for service callback functions
         RED.httpNode.post(node.callbackpath, function (req, res) {
+            const fname = "RED.httpNode.post() ";
             // check if token matches the one issued by the API upon registration of the client
-            node.trace(req.body);
-            if (req.body && req.body.token && req.body.token == node.token) {
-                res.sendStatus(200).end();
+            node.trace(JSON.stringify(req.body));
 
-                // delete security token from response
-                delete req.body.token;
-
-                // if uiConfig has changed, update the configuration of the node
-                if (req.body.events && req.body.events.length > 0 && req.body.events[0].event == 'uiConfigChanged') {
-                    node.getUIconfig();
-                }
-
-                if (req.body.events.length > 0) {
-                    node.nodeClients.forEach(stack => {
-                        if (stack.giranodetype == 'gira-event') {
-                            // node.debug(req.body);
-                            stack.queueEvent(req.body);
-                        }
-                    });
-                }
-                else if (req.body && req.body.token && req.body.token != node.token) {
-                    node.setconnectionstate(false);
+            if (req.body && req.body.token) {
+                if (req.body.token != node.token) {
+                    node.setConnectionState(false);
                     res.sendStatus(401).end();
+                    res.statusMessage = 'Unauthorized; provided token is wrong.';
+                    node.debug(fname + "Token '" + req.body.token + "' wrong; sendStatus=401");
+                }
+                else if (req.body.token == node.token) {
+                    // delete security token from response
+                    delete req.body.token;
+
+                    // if uiConfig has changed, update the configuration of the node
+                    if (req.body.events && req.body.events.length > 0 && req.body.events[0].event && req.body.events[0].event == 'uiConfigChanged') {
+                        node.getUIconfig();
+                    }
+
+                    if (req.body.events && req.body.events.length > 0 && req.body.events[0].event && req.body.events[0].event == 'test') {
+                        node.debug(fname + "Test request of Gira API received.");
+                    }
+
+                    // Not sent by Gira API; just for my mockedup API tests
+                    if (req.body.events && req.body.events.length > 0 && req.body.events[0].event && req.body.events[0].event == 'ping') {
+                        node.debug(fname + "pong! :)");
+                    }
+
+                    if (req.body.events && req.body.events.length > 0) {
+                        node.nodeClients.forEach(stack => {
+                            if (stack.giranodetype == 'gira-event') {
+                                node.debug(fname + 'queue event');
+                                stack.queueEvent(req.body);
+                            }
+                        });
+                    }
+
+                    res.sendStatus(200).end();
+                    node.debug(fname + "Token correct; sendStatus=200");
                 }
             }
-            // otherwise return 'unauthorized'
+            // otherwise return 'server error'
             else {
+                node.debug(fname + "Token missing; sendStatus=401");
+                res.statusMessage = 'Unauthorized; no token provided.';
                 res.sendStatus(401).end();
             }
         });
@@ -77,6 +96,8 @@ module.exports = function (RED) {
 
         // Register Callback functions for event handling
         node.getUIconfig = () => {
+            const fname = "getUIconfig() ";
+            node.debug(fname);
             var client;
             client = new gira_rest_api.GiraRestApi({ domain: this.hosturl });
 
@@ -113,7 +134,7 @@ module.exports = function (RED) {
             }).catch(function (error) {
                 var message = null;
                 if (error && error.body && error.body.error && error.body.error.message) {
-                    message = "Gira API: " + error.body.error.message;
+                    message = fname + "Gira API: " + error.body.error.message;
                 }
                 else if (error && error.body && error.body.message) {
                     message = error.body.message;
@@ -127,10 +148,20 @@ module.exports = function (RED) {
 
         // Unregister Callback functions for event handling
         node.unregisterCallbacks = () => {
+            const fname = "unregisterCallbacks() ";
+            node.debug(fname);
+
+            if( node.token.length === 0 )
+            {
+                node.debug(fname + "token not set");
+                return;
+            }
+
             var client;
             client = new gira_rest_api.GiraRestApi({ domain: this.hosturl });
 
             var result;
+            node.debug(fname + "token=" + node.token)
             var parameters = { 'token': node.token };
             result = client.GiraAPI_UnregisterCallbacks(parameters);
 
@@ -155,12 +186,12 @@ module.exports = function (RED) {
             };
 
             result.then(function (data) {
-                // node.debug("unregister callbacks");
+                node.debug(fname + "successfull");
                 node.callback_registered = false;
             }).catch(function (error) {
                 var message = null;
                 if (error && error.body && error.body.error && error.body.error.message) {
-                    message = "Gira API: " + error.body.error.message;
+                    message = fname + "Gira API: " + error.body.error.message;
                 }
                 else if (error && error.body && error.body.message) {
                     message = error.body.message;
@@ -173,12 +204,13 @@ module.exports = function (RED) {
 
         // Register Callback functions for event handling
         node.registerCallbacks = () => {
-            node.debug('registerCallbacks: ' + node.callbackpath);
+            const fname = 'registerCallbacks() ';
+            node.debug(fname + node.callbackpath);
             if (node.callbackpath) {
                 const serviceCallback = new URL(node.callbackpath, node.callbackurl).href;
                 const valueCallback = new URL(node.callbackpath, node.callbackurl).href;
 
-                node.debug('Registering ' + valueCallback);
+                node.debug(fname + 'Registering ' + valueCallback);
 
                 var client;
                 client = new gira_rest_api.GiraRestApi({ domain: this.hosturl });
@@ -216,12 +248,12 @@ module.exports = function (RED) {
                 };
 
                 result.then(function (data) {
-                    node.debug("Successfully registered callbacks!");
+                    node.debug(fname + "Successfully registered callbacks.");
                     node.callback_registered = true;
                 }).catch(function (error) {
                     var message = null;
                     if (error && error.body && error.body.error && error.body.error.message) {
-                        message = "Gira API: " + error.body.error.message;
+                        message = fname + "Gira API: " + error.body.error.message;
                     }
                     else if (error && error.body && error.body.message) {
                         message = error.body.message;
@@ -267,7 +299,8 @@ module.exports = function (RED) {
 
         // Register client with Gira API
         node.registerClient = () => {
-            node.debug("Register Client.");
+            const fname = "registerClient() ";
+            node.debug(fname);
             var client;
             client = new gira_rest_api.GiraRestApi({ domain: this.hosturl, username: this.credentials.username, password: this.credentials.password });
 
@@ -298,22 +331,23 @@ module.exports = function (RED) {
             result.then(function (data) {
                 if (data.body.token) {
                     node.token = data.body.token;
-                    node.setconnectionstate(true);
+                    node.debug(fname + "token=" + data.body.token);
+                    node.setConnectionState(true);
                 }
                 else {
-                    node.setconnectionstate(false);
+                    node.setConnectionState(false);
                     // FIXME: done() doesn't work here, altough it's the prefered method sice v1.0
-                    node.error("Registration with Gira API failed; no valid 'token' in response.");
+                    node.error(fname + "Registration with Gira API failed; no valid 'token' in response.");
                 }
             }).catch(function (error) {
                 var message = null;
                 if (error && error.body && error.body.error && error.body.error.message) {
-                    message = "Gira API: " + error.body.error.message;
+                    message = fname + "Gira API: " + error.body.error.message;
                 }
                 else if (error && error.body && error.body.message) {
                     message = error.body.message;
                 }
-                node.setconnectionstate(false);
+                node.setConnectionState(false);
                 // FIXME: done() doesn't work here, altough it's the prefered method sice v1.0
                 node.error(message);
             });
@@ -322,6 +356,9 @@ module.exports = function (RED) {
 
         // Unregister client with Gira API
         node.unregisterClient = () => {
+            const fname = "unregisterClient() ";
+            node.debug(fname);
+
             var client;
             client = new gira_rest_api.GiraRestApi({ domain: this.hosturl });
 
@@ -350,12 +387,12 @@ module.exports = function (RED) {
             };
 
             result.then(function (data) {
-                node.debug("unregister client");
-                node.setconnectionstate(false);
+                node.setConnectionState(false);
+                node.callback_registered = false;
             }).catch(function (error) {
                 var message = null;
                 if (error && error.body && error.body.error && error.body.error.message) {
-                    message = "Gira API: " + error.body.error.message;
+                    message = fname + "Gira API: " + error.body.error.message;
                 }
                 else if (error && error.body && error.body.message) {
                     message = error.body.message;
@@ -367,9 +404,10 @@ module.exports = function (RED) {
         }
 
         // Set Connection to disconnected
-        node.setconnectionstate = (state) => {
+        node.setConnectionState = (state) => {
+            const fname = "setConnectionState() ";
             if (node.connected != state) {
-                node.debug("state changed");
+                node.debug(fname + "state changed");
                 node.connected = state;
 
                 node.nodeClients.forEach(stack => {
@@ -382,41 +420,47 @@ module.exports = function (RED) {
                 });
             }
 
-            if ( !node.connected ) {
-                node.registerApi();
+            if (!node.connected) {
+                node.waituntiltoken = setTimeout(function () { node.registerApi(); }, 3000);
             }
 
-            node.debug('connectionstate = ' + node.connected);
+            if ((!node.callback_registered && node.nodeClients.filter(n => n.giranodetype == 'gira-event').length > 0)) {
+                node.registerCallbacks();
+            }
+
+            node.debug(fname + "setConnctionState: connectionstate = " + node.connected);
         }
 
         // keep the node registereds to the API
         node.registerApi = () => {
+            const fname = "registerApi() ";
             if (!node.connected) {
-                node.debug("RegisterApi: registerClient()");
+                node.debug(fname + "Start registerClient()");
+                node.registerClient();
+            }
+            setTimeout(function () { node.registerApi2(); }, 3000);
+        }
+
+        node.registerApi2 = () => {
+            const fname = "registerApi() ";
+            if (!node.connected) {
+                node.debug(fname + "Start registerClient()");
                 node.registerClient();
             }
 
-            if (node.connected) {
-                clearInterval(node.waituntiltoken);
-                node.debug('API connected.');
+            if (node.connected && node.token) {
+                node.debug(fname + "API connected.");
                 node.getUIconfig();
                 if ((node.nodeClients.filter(n => n.giranodetype == 'gira-event').length > 0)) {
                     node.registerCallbacks();
                 }
             }
 
-            if (!node.connected) {
-                node.waituntiltoken = setInterval(function () { node.registerApi(); }, 1000);
-            }
-            else {
-                
+            if (!node.connected || node.token.length === 0) {
+                node.debug(fname + 'API not connected.');
+                node.waituntiltoken = setTimeout(function () { node.registerApi(); }, 5000);
             }
         }
-
-        // Constructor
-
-        // Wait until token is available, then get the configuration and register callbacks
-        node.setconnectionstate(false);
 
         // Events
         this.on('close', function (removed, done) {
@@ -432,14 +476,15 @@ module.exports = function (RED) {
                 node.unregisterCallbacks();
             }
             node.unregisterClient();
-            // done();
+            done();
         });
 
         // Constructor
+
         // Register Client
 
         if (node.hosturl) {
-            node.registerClient();
+            node.setConnectionState(false);
         }
         else {
             node.error("HostUrl is not set.");

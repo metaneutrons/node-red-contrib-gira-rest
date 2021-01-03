@@ -3,3 +3,4 @@ other/
 scripts/
 .vscode
 *.tgz
+*.code-workspace

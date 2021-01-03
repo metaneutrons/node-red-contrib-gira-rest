@@ -18,6 +18,7 @@
  */
 
  'use strict';
+const { denodeify } = require('q');
 var gira_rest_api = require('./lib/gira-rest-api.js');
 
 module.exports = function (RED) {
@@ -54,28 +55,20 @@ module.exports = function (RED) {
         });
 
         node.on('input', function (msg, send, done) {
+            const fname = "node.on('input')";
             var errorFlag = false;
             var client;
-
-            if (this.host.token.length == 0)
-            {
-                done('Not registered with Gira API. No token.');
-                return;
-            }
 
             if (this.host && this.host.hosturl) {
                 client = new gira_rest_api.GiraRestApi({ domain: this.host.hosturl });
             } else {
                 errorFlag = true;
-                done('HostUrl in configuration node is not specified.', msg);
+                done('Node is not associated with a host configuration.');
             }
 
             if (!node.host.connected) {
+                done('Not connected to Gira API.');
                 errorFlag = true;
-            }
-
-            if (!errorFlag && this.host && this.host.credentials) {
-                client.setBasicAuth(this.host.credentials.username, this.host.credentials.password);
             }
 
             var result;
@@ -159,12 +152,13 @@ module.exports = function (RED) {
                     else if (error && error.body && error.body.message) {
                         message = error.body.message;
                     }
+                    done(message);
                     node.status({ fill: 'red', shape: 'ring', text: 'node-red:common.status.error' });
-                    done(message, setData(msg, error));
                     return;
                 });
             }
             else {
+                done(fname + "error");
                 node.status({ fill: 'red', shape: 'ring', text: 'node-red:common.status.error' });
                 return;
             }
