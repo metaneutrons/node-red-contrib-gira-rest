@@ -206,4 +206,4 @@ I developed this set of nodes for my personal learning experience and use in my 
 [npm-downloads-month-image]: https://img.shields.io/npm/dm/node-red-contrib-gira-rest.svg
 [npm-downloads-total-image]: https://img.shields.io/npm/dt/node-red-contrib-gira-rest.svg
 [gira-api-url]: https://download.gira.de/data3/Gira_IoT_REST_API_v2_EN.pdf
-[example-flow-png-url]: https://raw.githubusercontent.com/metaneutrons/node-red-contrib-gira-rest/main/other/gfx/example-node-configuration.png
+[example-flow-png-url]: https://github.com/metaneutrons/node-red-contrib-gira-rest/blob/main/other/gfx/example-node-configuration.png
