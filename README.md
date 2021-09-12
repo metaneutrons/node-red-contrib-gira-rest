@@ -177,8 +177,7 @@ The `gira-event` node is simple to use. It emits all events received by the Gira
 There are some special events desrcibed in chapter 4.6 of the [Gira REST API]([gira-api-url]) documentation. Most notably is the event `uiConfigChanged`. This event notifies the API client about a change of the internal user interface configuration of the Gira X1/Gira HomeServer. If this event gets fired, the `gira-host` node updates it's internal `uiconfig` object.
 
 ## Example
-
-![Example Flow]([example-flow-png-url])
+![Example Flow][example-flow-png-url]
 
 ## Todos
 
